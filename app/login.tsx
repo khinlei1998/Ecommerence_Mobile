@@ -40,21 +40,12 @@ const SignIn = () => {
     });
   };
 
-  const onSubmit = (formState) => console.log(formState);
+  const onSubmit = (formState) => {
+    console.log("formState", formState);
+    signIn();
+    router.replace("/");
+  };
   return (
-    // <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-    //   <Text
-    //     onPress={() => {
-    //       signIn();
-    //       // Navigate after signing in. You may want to tweak this to ensure sign-in is
-    //       // successful before navigating.
-    //       router.replace("/");
-    //     }}
-    //     style={{ fontSize: 27 }}
-    //   >
-    //     Sign In
-    //   </Text>
-    // </View>
     <SafeAreaView className="flex-1 bg-white px-4">
       <ScrollView showsVerticalScrollIndicator={false}>
         <HStack space="sm" className="mt-3 items-center justify-end">
