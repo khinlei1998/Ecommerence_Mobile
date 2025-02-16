@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { HStack } from "@/components/ui/hstack";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
@@ -7,7 +7,7 @@ type TitleProps = {
   actionText: string;
 };
 
-export default function Ttitle({ title, actionText }: TitleProps) {
+function Ttitle({ title, actionText }: TitleProps) {
   return (
     <HStack className="items-center justify-between">
       <Text size="lg" className="font-medium text-black">
@@ -19,3 +19,5 @@ export default function Ttitle({ title, actionText }: TitleProps) {
     </HStack>
   );
 }
+
+export default memo(Ttitle);

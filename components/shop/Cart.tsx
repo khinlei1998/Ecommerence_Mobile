@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Badge, BadgeText } from "@/components/ui/badge";
 import { Box } from "@/components/ui/box";
 import { Button, ButtonText } from "@/components/ui/button";
@@ -5,7 +6,9 @@ import { VStack } from "@/components/ui/vstack";
 import { Icon } from "../ui/icon";
 import { ShoppingCart } from "lucide-react-native";
 import { Pressable } from "../ui/pressable";
-export default function Cart() {
+
+function Cart() {
+  console.log("Cart render");
   return (
     <Box className="items-center">
       <VStack>
@@ -22,3 +25,5 @@ export default function Cart() {
     </Box>
   );
 }
+
+export default memo(Cart);

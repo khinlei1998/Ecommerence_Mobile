@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ScrollView, Text, Dimensions } from "react-native";
+import { useState, useCallback } from "react";
+import { ScrollView, Text, Dimensions, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { HStack } from "@/components/ui/hstack";
@@ -25,9 +25,9 @@ export default function HomeScreen() {
 
   const numColumns = width < 600 ? 2 : width < 768 ? 3 : 4;
 
-  const onSelectHandler = (id: number) => {
+  const onSelectHandler = useCallback((id: number) => {
     setSelect(id);
-  };
+  }, []);
 
   const handleProductDetail = (id: number) => {
     router.navigate({ pathname: "/product-detail", params: { id } });
@@ -69,6 +69,14 @@ export default function HomeScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 7 }}
           />
+          {/* <FlatList
+            horizontal
+            data={categories}
+            renderItem={({ item }) => (
+              <Category {...item} onSelect={onSelectHandler} select={select} />
+            )}
+            keyExtractor={(item) => item.id}
+          /> */}
           <Ttitle title="Recommended For You" actionText="View All" />
           <FlashList
             data={products}

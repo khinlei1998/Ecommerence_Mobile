@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { ScrollView } from "react-native";
 import { Heart, StarIcon } from "lucide-react-native";
 import { useLocalSearchParams, Stack } from "expo-router";
@@ -107,6 +107,7 @@ export default function ProductDetail() {
       },
     });
   };
+  console.log("detail render", id);
 
   return (
     <VStack className="flex-1 bg-white">

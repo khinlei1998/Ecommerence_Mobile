@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
 import { Pressable } from "../ui/pressable";
@@ -12,13 +13,8 @@ type CategoryProps = {
   onSelect: (id: number) => void;
   select: number;
 };
-export default function Category({
-  id,
-  name,
-  image,
-  onSelect,
-  select,
-}: CategoryProps) {
+function Category({ id, name, image, onSelect, select }: CategoryProps) {
+  console.log("Category Render---", id);
   return (
     <Pressable onPress={() => onSelect(id)}>
       <Card className="items-center">
@@ -41,3 +37,4 @@ export default function Category({
     </Pressable>
   );
 }
+export default memo(Category);
