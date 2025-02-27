@@ -50,7 +50,10 @@ export default function HomeScreen() {
       </HStack>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Image
-          style={{ width: "100%", aspectRatio: 20 / 9 }}
+          style={{
+            width: "100%",
+            aspectRatio: 20 / 9,
+          }}
           source={require("@/assets/images/banner6.png")}
           placeholder={{ blurhash }}
           contentFit="cover"
@@ -69,14 +72,7 @@ export default function HomeScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 7 }}
           />
-          {/* <FlatList
-            horizontal
-            data={categories}
-            renderItem={({ item }) => (
-              <Category {...item} onSelect={onSelectHandler} select={select} />
-            )}
-            keyExtractor={(item) => item.id}
-          /> */}
+
           <Ttitle title="Recommended For You" actionText="View All" />
           <FlashList
             data={products}
@@ -91,6 +87,22 @@ export default function HomeScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingTop: 4 }}
           />
+          {/* <FlatList
+            // key={Math.ceil(CategoryList.length / 2) ?? 4}
+            // horizontal
+            // numColumns={numColumns}
+            key={"#"}
+            numColumns={2}
+            showsHorizontalScrollIndicator={false}
+            data={products}
+            renderItem={({ item }) => (
+              <Product
+                {...item}
+                onCallRoute={() => handleProductDetail(item.id)}
+              />
+            )}
+          /> */}
+
           <Button className="mx-auto mt-8 h-14 w-[200px] rounded-lg bg-blue-500 text-white">
             <ButtonText size="lg" className="font-bold">
               Explore More

@@ -38,7 +38,7 @@ export default function Product({
   console.log("Prodcut Render--", id);
   return (
     <Pressable className="flex-1" onPress={() => onCallRoute(id)}>
-      <Card className="relative p-2">
+      <Card className="relative p-2" variant="filled">
         <Image
           style={{ width: "100%", aspectRatio: 3 / 4, borderRadius: 5 }}
           source={image}
@@ -78,5 +78,31 @@ export default function Product({
         </VStack>
       </Card>
     </Pressable>
+    // <Card className="flex-1 rounded-lg" variant="filled">
+    //   <Image
+    //     style={{
+    //       width: "100%",
+    //       aspectRatio: 3 / 2,
+    //       borderRadius: 20,
+    //     }}
+    //     source={image}
+    //     placeholder={{ blurhash }}
+    //     contentFit="cover"
+    //     transition={1000}
+    //   />
+    //   <Text size="lg" bold className="text-center">
+    //     hello
+    //   </Text>
+    //   <HStack className="items-center justify-between">
+    //     <Text size="xs" className="bg-orange rounded-full p-2 text-white">
+    //       Breakfast
+    //     </Text>
+    //     <Text>5 Ingredient</Text>
+    //   </HStack>
+    //   {/* <Icon
+    //       as={Heart}
+    //       className={`m-2 h-5 w-5 text-red-400 ${fill && "fill-red-400"}`}
+    //     /> */}
+    // </Card>
   );
 }

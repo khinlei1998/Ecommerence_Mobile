@@ -40,9 +40,9 @@ const SignIn = () => {
     });
   };
 
-  const onSubmit = (formState) => {
+  const onSubmit = async (formState: any) => {
     console.log("formState", formState);
-    signIn();
+    await signIn(formState);
     router.replace("/");
   };
   return (
@@ -107,7 +107,7 @@ const SignIn = () => {
                     size="xl"
                   >
                     <InputField
-                      placeholder="0977****7"
+                      placeholder="09778661260"
                       inputMode="numeric"
                       maxLength={12}
                       value={value}

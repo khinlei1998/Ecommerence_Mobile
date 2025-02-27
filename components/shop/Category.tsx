@@ -17,7 +17,7 @@ function Category({ id, name, image, onSelect, select }: CategoryProps) {
   console.log("Category Render---", id);
   return (
     <Pressable onPress={() => onSelect(id)}>
-      <Card className="items-center">
+      <Card className="items-center" variant="filled">
         <Image
           style={[
             { width: 56, height: 56 },
