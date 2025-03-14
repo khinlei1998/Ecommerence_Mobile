@@ -7,24 +7,17 @@ import { Icon, StarIcon } from "../ui/icon";
 import { Heart } from "lucide-react-native";
 import { VStack } from "../ui/vstack";
 import { HStack } from "../ui/hstack";
-
-type ProductProps = {
-  id: number;
-  categories_id: number;
-  brand: string;
-  title: string;
-  star: number;
-  quantity: number;
-  price: number;
-  discount: number;
-  image: any;
+import { ProductType } from "@/types";
+import { IMG_URL } from "@/config";
+interface ProductProps extends ProductType {
   onCallRoute: (id: number) => void;
-};
+  toggleFavorite: (prodcutId: number, favourite: boolean) => void;
+}
+
 const blurhash =
   "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 export default function Product({
   id,
-  categories_id,
   brand,
   title,
   star,
@@ -32,27 +25,29 @@ export default function Product({
   price,
   discount,
   image,
+  users,
   onCallRoute,
+  toggleFavorite,
 }: ProductProps) {
   const [fill, setFill] = useState(false);
-  console.log("Prodcut Render--", id);
+  console.log("users", users.length);
   return (
     <Pressable className="flex-1" onPress={() => onCallRoute(id)}>
-      <Card className="relative p-2" variant="filled">
+      <Card className="relative p-2">
         <Image
           style={{ width: "100%", aspectRatio: 3 / 4, borderRadius: 5 }}
-          source={image}
+          source={IMG_URL + image}
           placeholder={{ blurhash }}
           contentFit="cover"
           transition={1000}
         />
         <Pressable
           className="absolute right-4 top-4 rounded-full bg-zinc-300/40"
-          onPress={() => setFill((p) => !p)}
+          onPress={() => toggleFavorite(id, users.length === 0)}
         >
           <Icon
             as={Heart}
-            className={`m-2 h-5 w-5 text-red-400 ${fill && "fill-red-400"}`}
+            className={`m-2 h-5 w-5 text-red-400 ${users.length > 0 && "fill-red-400"}`}
           />
         </Pressable>
         <VStack className="mt-2">

@@ -107,7 +107,7 @@ const SignIn = () => {
                     size="xl"
                   >
                     <InputField
-                      placeholder="09778661260"
+                      placeholder="09****"
                       inputMode="numeric"
                       maxLength={12}
                       value={value}
