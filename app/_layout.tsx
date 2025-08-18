@@ -1,8 +1,7 @@
 import { Slot } from "expo-router";
 import "@/global.css";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
-import { SessionProvider } from "@/provider/ctx";
-import AuthProvider from "@/provider/auth_ctx";
+import { SessionProvider } from "@/provider/auth_ctx";
 import { SafeAreaView } from "react-native";
 import {
   useQuery,

@@ -9,9 +9,10 @@ import { VStack } from "../ui/vstack";
 import { HStack } from "../ui/hstack";
 import { ProductType } from "@/types";
 import { IMG_URL } from "@/config";
+
 interface ProductProps extends ProductType {
   onCallRoute: (id: number) => void;
-  toggleFavorite: (prodcutId: number, favourite: boolean) => void;
+  toggleFavorite: (productId: number, favourite: boolean) => void;
 }
 
 const blurhash =

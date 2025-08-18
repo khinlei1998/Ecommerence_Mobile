@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { router } from "expo-router";
-import { useSession } from "@/provider/ctx";
+import { useSession } from "@/provider/auth_ctx";
 import { Button, ButtonText, ButtonSpinner } from "@/components/ui/button";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native";

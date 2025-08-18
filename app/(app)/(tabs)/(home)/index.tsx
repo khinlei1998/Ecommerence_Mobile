@@ -23,6 +23,12 @@ import {
 } from "@tanstack/react-query";
 import api from "@/api/axios";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
+import {
+  useToast,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+} from "@/components/ui/toast";
 const blurhash =
   "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
@@ -46,6 +52,32 @@ export default function HomeScreen() {
   const handleProductDetail = (id: number) => {
     router.navigate({ pathname: "/product-detail", params: { id } });
   };
+
+  const toast = useToast();
+  const [toastId, setToastId] = useState(0);
+  const handleToast = (title: string, description: string) => {
+    if (!toast.isActive(toastId.toString())) {
+      showNewToast(title, description);
+    }
+  };
+  const showNewToast = useCallback((title: string, description: string) => {
+    const newId = Math.random();
+    setToastId(newId);
+    toast.show({
+      id: newId.toString(),
+      placement: "bottom",
+      duration: 2000,
+      render: ({ id }) => {
+        const uniqueToastId = "toast-" + id;
+        return (
+          <Toast nativeID={uniqueToastId} action="info" variant="solid">
+            <ToastTitle>{title}</ToastTitle>
+            <ToastDescription>{description}</ToastDescription>
+          </Toast>
+        );
+      },
+    });
+  }, []);
 
   const fetchCatgory = async (): Promise<CategoryType[]> => {
     const response = await api.get("categories");
@@ -82,7 +114,6 @@ export default function HomeScreen() {
     productId: number;
     favourite: boolean;
   }) => {
-    console.log("productId", productId);
     const response = await api.post(`/products/favourite-toggle`, {
       productId,
       favourite,
@@ -93,12 +124,13 @@ export default function HomeScreen() {
   };
 
   const toggleFavoriteMutation = useMutation({
-    //optimistic update
+    //optimistic update (update from cache)
     mutationFn: toggleFavorite,
 
     onMutate: async ({ productId, favourite }) => {
       //can click another time before the first one is done
       await queryClient.cancelQueries({ queryKey: ["products", select] });
+      //get data from old cache
       const previousProducts = queryClient.getQueryData<ProductApiResponse>([
         "products",
         select,
@@ -139,24 +171,27 @@ export default function HomeScreen() {
   //   return <Text>Loading...</Text>;
   // }
 
-  // useEffect(() => {
-  //   if (categories) {
-  //     setSelect(categories[0].id);
-  //   }
-  // }, [categories]);
+  if (categoryError || productError) {
+    return (
+      <Box className="flex-1 items-center justify-center">
+        <Text className="mb-4">
+          Error : {categoryError?.message || productError?.message}
+        </Text>
+        <Button
+          size="md"
+          variant="solid"
+          action="primary"
+          onPress={() => {
+            refetchCategory();
+            refetchProduct();
+          }}
+        >
+          <ButtonText>Retry</ButtonText>
+        </Button>
+      </Box>
+    );
+  }
 
-  const data = {
-    brand: "H&M",
-    categoryId: 1,
-    discount: 0,
-    id: 8,
-    image: "w5.png",
-    price: 220,
-    quantity: 234,
-    star: 4.5,
-    title: "Loose Fit T-Shirt",
-    users: [],
-  };
   return (
     <SafeAreaView className="flex-1 bg-white">
       <HStack className="my-2 items-center justify-between px-5">
@@ -221,7 +256,7 @@ export default function HomeScreen() {
               renderItem={({ item }) => (
                 <Product
                   {...item}
-                  onCallRoute={() => handleProductDetail(item.id)}
+                  onCallRoute={handleProductDetail}
                   toggleFavorite={handleToggleFavorite}
                 />
               )}
