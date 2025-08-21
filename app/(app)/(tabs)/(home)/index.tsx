@@ -156,10 +156,12 @@ export default function HomeScreen() {
     },
     onError: (err, variables, context) => {
       queryClient.setQueryData(["products", select], context?.previousProducts);
+      handleToast("Error", err.message || "Something went wrong");
     },
     onSuccess: () => {
       //data is change xo we need to recall api
       queryClient.invalidateQueries({ queryKey: ["products", select] });
+      queryClient.invalidateQueries({ queryKey: ["product"] });
     },
   });
 

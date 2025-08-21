@@ -2,7 +2,13 @@ import React, { useState, memo } from "react";
 import { ScrollView } from "react-native";
 import { Heart, StarIcon } from "lucide-react-native";
 import { useLocalSearchParams, Stack } from "expo-router";
-import { products } from "@/data";
+import {
+  useQueries,
+  useMutation,
+  useQueryClient,
+  useQuery,
+} from "@tanstack/react-query";
+// import { products } from "@/data";
 import { VStack } from "@/components/ui/vstack";
 import { Text } from "@/components/ui/text";
 import { Pressable } from "@/components/ui/pressable";
@@ -42,6 +48,9 @@ import {
   ToastTitle,
   useToast,
 } from "@/components/ui/toast";
+import api from "@/api/axios";
+import { ProductType, CartItem } from "@/types";
+import { products } from "@/data";
 
 type CartProps = {
   id: number;
@@ -51,7 +60,6 @@ type CartProps = {
 };
 
 export default function ProductDetail() {
-  const [fill, setFill] = useState(false);
   const [colors, setColors] = useState([]);
   const [sizes, setSizes] = useState([]);
   const [quantity, setQuantity] = useState(1);
@@ -59,9 +67,29 @@ export default function ProductDetail() {
   const [toastId, setToastId] = useState(0);
 
   const { id } = useLocalSearchParams();
-  const product = products.find((p) => p.id === +id); //convert id to number
+
+  const queryClient = useQueryClient();
+
+  // const product = products.find((p) => p.id === +id); //convert id to number
 
   const [showActionsheet, setShowActionsheet] = React.useState(false);
+
+  const fetchProduct = async (productId: number): Promise<ProductType> => {
+    const response = await api.get(`products/${productId}`);
+    return response.data;
+  };
+
+  const {
+    data: product,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["product", id],
+    queryFn: () => fetchProduct(+id),
+    staleTime: 1000 * 60 * 5, //recall api after 5min
+  });
+
   const handleClose = () => {
     setShowActionsheet(false);
     if (quantity === 0) return;
@@ -81,13 +109,13 @@ export default function ProductDetail() {
 
   const toast = useToast();
 
-  const handleToast = () => {
+  const handleToast = (title: string, description: string) => {
     if (!toast.isActive(toastId.toString())) {
-      showNewToast();
+      showNewToast(title, description);
     }
   };
 
-  const showNewToast = () => {
+  const showNewToast = (title: string, description: string) => {
     const newId = Math.random();
     setToastId(newId);
     toast.show({
@@ -98,16 +126,86 @@ export default function ProductDetail() {
         const uniqueToastId = "toast-" + id;
         return (
           <Toast nativeID={uniqueToastId} action="info" variant="solid">
-            <ToastTitle>{`Must Choose ${colors.length === 0 ? "color -" : ""} ${sizes.length === 0 ? "Sizes -" : ""}`}</ToastTitle>
-            <ToastDescription>
-              Please set quantity after choosing
-            </ToastDescription>
+            <ToastTitle>{title}</ToastTitle>
+            <ToastDescription>{description}</ToastDescription>
           </Toast>
         );
       },
     });
   };
-  console.log("detail render", id);
+
+  const toggleFavorite = async (productId: number) => {
+    const response = await api.post(`/products/favourite-toggle`, {
+      productId,
+      favourite: product?.users.length === 0, //if no user then add to favorite
+    });
+    // console.log("response", response.data);
+
+    return response.data;
+  };
+
+  const toggleFavoriteMutation = useMutation({
+    //optimistic update (update from cache)
+    mutationFn: toggleFavorite,
+
+    onMutate: async (id) => {
+      //can click another time before the first one is done
+      await queryClient.cancelQueries({ queryKey: ["product", id] });
+      const previousProduct = queryClient.getQueryData(["product", id]);
+      console.log("previousProduct", previousProduct);
+
+      queryClient.setQueryData(["product", id], (oldData: any) => {
+        // if (oldData) return oldData;
+        const favoriteData = product?.users.length === 0 ? [{ id: 1 }] : [];
+        console.log("favoriteData", favoriteData);
+        return {
+          ...oldData,
+          users: favoriteData,
+        };
+      });
+      return { test: 1 };
+      // })
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(["product", id], context?.previousProduct);
+      handleToast("Error", err.message || "Something went wrong");
+    },
+    onSuccess: () => {
+      //data is change xo we need to recall api
+      queryClient.invalidateQueries({
+        queryKey: ["products", product?.categoryId],
+      });
+    },
+  });
+
+  const handleToggleFavorite = () => {
+    toggleFavoriteMutation.mutate(+id);
+  };
+
+  if (isLoading) {
+    <VStack className="flex-1 items-center justify-center">
+      <Text>Loading....</Text>
+    </VStack>;
+  }
+  if (error) {
+    return (
+      <Box className="flex-1 items-center justify-center">
+        <Text className="mb-4">Error : {error?.message}</Text>
+        <Button
+          size="md"
+          variant="solid"
+          action="primary"
+          onPress={() => {
+            refetch();
+          }}
+        >
+          <ButtonText>Retry</ButtonText>
+        </Button>
+      </Box>
+    );
+  }
+
+  console.log("product", product);
 
   return (
     <VStack className="flex-1 bg-white">
@@ -155,10 +253,10 @@ export default function ProductDetail() {
               </HStack>
             </VStack>
 
-            <Pressable>
+            <Pressable onPress={handleToggleFavorite}>
               <Icon
                 as={Heart}
-                className={`m-1 h-5 w-5 ${fill ? "fill-red-500" : "text-red-500"}`} //true must
+                className={`m-1 h-5 w-5 text-red-500 ${product!?.users?.length > 0 && "fill-red-500"}`} //true must
               />
             </Pressable>
           </HStack>
@@ -172,16 +270,16 @@ export default function ProductDetail() {
             }}
           >
             <HStack space="xl" className="flex-wrap">
-              {product?.colors.map((color) => {
-                if (!color.stock) {
-                  return null;
-                }
+              {product?.colors.map((item) => {
+                // if (!item.color.stock) {
+                //   return null;
+                // }
                 return (
-                  <Checkbox value={color.name} key={color.id}>
+                  <Checkbox value={item.color.name} key={item.color.id}>
                     <CheckboxIndicator>
                       <CheckboxIcon as={CheckIcon} />
                     </CheckboxIndicator>
-                    <CheckboxLabel>{color.name}</CheckboxLabel>
+                    <CheckboxLabel>{item.color.name}</CheckboxLabel>
                   </Checkbox>
                 );
               })}
@@ -197,16 +295,16 @@ export default function ProductDetail() {
             }}
           >
             <HStack space="xl" className="flex-wrap">
-              {product?.sizes.map((size) => {
-                if (!size.stock) {
-                  return null;
-                }
+              {product?.sizes.map((item) => {
+                // if (!size.stock) {
+                //   return null;
+                // }
                 return (
-                  <Checkbox value={size.name} key={size.id}>
+                  <Checkbox value={item.size.name} key={item.size.id}>
                     <CheckboxIndicator>
                       <CheckboxIcon as={CheckIcon} />
                     </CheckboxIndicator>
-                    <CheckboxLabel>{size.name}</CheckboxLabel>
+                    <CheckboxLabel>{item.size.name}</CheckboxLabel>
                   </Checkbox>
                 );
               })}
@@ -223,7 +321,9 @@ export default function ProductDetail() {
                   setShowActionsheet(true);
                   return;
                 }
-                handleToast();
+                const title = `Must Choose ${colors.length === 0 ? "color -" : ""} ${sizes.length === 0 ? "Sizes -" : ""}`;
+                const description = "Please set quantity after choosing";
+                handleToast(title, description);
               }}
             >
               <ButtonText>Set Quantity</ButtonText>
